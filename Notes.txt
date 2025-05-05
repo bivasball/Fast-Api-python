@@ -1,0 +1,28 @@
+
+$python -m venv myenv
+# to use the virtual environment created `myenv`
+#to View > Terminal then run  myenv\Scripts\Activate
+Step 4: Set Python Interpreter in VS Code
+Open Command Palette (Ctrl + Shift + P).
+Search for "Python: Select Interpreter".
+Choose the interpreter inside your virtual environment:
+
+## start ##
+$pip install fastapi[all]
+# to see all installed dependencies
+$pip freeze
+# to run the Server  run the below Command
+$fastapi dev main.py
+# uvicorn start the Server
+$uvicorn main:app
+# if we donot want to restart the server but want to refresh only #
+$uvicorn main:app --reload
+# We have move the main.py under app folder
+uvicorn app.main:app
+uvicorn app.main:app --reload
+
+
+If port 8000 is occupied and you need to free it, follow these steps:
+1. Identify the Process Using Port 8000
+netstat -ano | findstr :8000
+taskkill /PID <PID> /F
