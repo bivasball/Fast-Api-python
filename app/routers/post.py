@@ -6,6 +6,7 @@ import psycopg2
 import psycopg2.extras
 from ..schemas import DataModel
 from .. import schemas
+
 from sqlalchemy.orm import Session
 from ..database import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -138,3 +139,18 @@ async def create_product_and_save_to_Db(product: ProductCreate122, db: Session =
     except Exception as e:
         db.rollback()  # Rollback in case of errors
         raise HTTPException(status_code=500, detail=str(e))
+
+
+
+@router.get("/add/{a}/{b}")
+def add_numbers(a: int, b: int, db: Session = Depends(get_db)):
+    """The below add_numbers is a db function,here we are calling a db function"""
+    result = db.execute(text(f"SELECT add_numbers(:a, :b)"), {"a": a, "b": b}).fetchone()
+    return {"result": result[0]}
+
+
+@router.post("/insert/{username}")
+def insert_user(username: str, db: Session = Depends(get_db)):
+    db.execute(text("CALL fast_api.insert_user(:username)"), {"username": username})
+    db.commit()
+    return {"message": f"User `{username}` inserted successfully in fast_api.users table, by the procedure."}

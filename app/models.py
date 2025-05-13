@@ -16,8 +16,8 @@ class Post(Base):
     published = Column(Boolean, server_default='TRUE', nullable=False)
     created_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text('now()'))
-    owner_id = Column(Integer, ForeignKey(
-        "fast_api.users.id", on_update_on_delete="CASCADE"), nullable=False)  # Include schema name
+    #owner_id = Column(Integer, ForeignKey(
+      #  "fast_api.users.id", on_update_on_delete="CASCADE"), nullable=False)  # Include schema name
 
     owner = relationship("User")
 

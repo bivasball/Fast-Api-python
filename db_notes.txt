@@ -1,0 +1,38 @@
+CREATE OR REPLACE FUNCTION add_numbers(a INT, b INT)
+RETURNS INT AS $$
+BEGIN
+    RETURN a + b;
+END;
+$$ LANGUAGE plpgsql;
+
+the call the above function is sql query :
+SELECT add_numbers(5, 10);
+
+====================================================
+
+# to check if function exists#
+SELECT proname, pg_namespace.nspname 
+FROM pg_proc 
+JOIN pg_namespace ON pg_proc.pronamespace = pg_namespace.oid 
+WHERE pg_namespace.nspname NOT IN ('pg_catalog', 'information_schema');
+
+==================================
+CREATE TABLE fast_api.users (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL
+);
+
+========creating a procedure to insert date====
+CREATE PROCEDURE fast_api.insert_user(IN username TEXT)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    INSERT INTO fast_api.users (name) VALUES (username);
+END;
+$$;
+===============================to verify - that procedure is present in the database or  not ================
+SELECT proname 
+FROM pg_proc 
+JOIN pg_namespace ON pg_proc.pronamespace = pg_namespace.oid
+WHERE nspname = 'fast_api';
+==========================================
