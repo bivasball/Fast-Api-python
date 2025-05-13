@@ -10,7 +10,7 @@ SELECT add_numbers(5, 10);
 
 ====================================================
 
-# to check if function exists#
+# to check if db function exists#
 SELECT proname, pg_namespace.nspname 
 FROM pg_proc 
 JOIN pg_namespace ON pg_proc.pronamespace = pg_namespace.oid 
@@ -35,4 +35,42 @@ SELECT proname
 FROM pg_proc 
 JOIN pg_namespace ON pg_proc.pronamespace = pg_namespace.oid
 WHERE nspname = 'fast_api';
+
+
 ==========================================
+----------CREATE A FUNCTION THAT WILL COUNT THE NUMBER OF USERS INSERTED---------
+
+CREATE FUNCTION fast_api.get_user_count()
+RETURNS INT AS $$
+BEGIN
+    RETURN (SELECT COUNT(*) FROM fast_api.users);
+END;
+$$ LANGUAGE plpgsql;
+
+
+the call the above function is sql query :
+SELECT fast_api.get_user_count();
+=====================================
+
+CREATE TABLE fast_api.usersEmailPass (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR NOT NULL UNIQUE,
+    password VARCHAR NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+======================= creating a procedure to insert data -------------
+CREATE PROCEDURE fast_api.insert_user_proc(IN email VARCHAR, IN password VARCHAR)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    INSERT INTO fast_api.usersEmailPass (email, password, created_at)
+    VALUES (email, password, CURRENT_TIMESTAMP);
+END;
+$$;
+========================
+
+
+
+
+

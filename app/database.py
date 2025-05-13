@@ -1,15 +1,9 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
+from .config import DATABASE_USERNAME,DATABASE_PASSWORD, DATABASE_HOSTNAME,DATABASE_PORT, DATABASE_NAME
 
 
-# Define the database URL using environment variables
-#SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg2://{settings.database_username}:{settings.database_password}@{settings.database_hostname}:{settings.database_port}/{settings.database_name}"
-
-# Define the database URL using environment variables
-SQLALCHEMY_DATABASE_URL = "postgresql+psycopg2://postgres:root%40123@127.0.0.1:5432/tatai"
-
-
-
+SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg2://{DATABASE_USERNAME}:{DATABASE_PASSWORD}@{DATABASE_HOSTNAME}:{DATABASE_PORT}/{DATABASE_NAME}"
 
 # Create the database engine with SQLAlchemy 2.0 best practices
 engine = create_engine(SQLALCHEMY_DATABASE_URL, future=True)

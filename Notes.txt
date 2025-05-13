@@ -51,3 +51,31 @@ python -m pip install sqlalchemy
 pip install --upgrade sqlalchemy
 pip install pydantic-settings
 ======================================================
+
+pip install python-dateutil
+pip install passlib
+pip install passlib[bcrypt]
+
+pip install python-jose
+
+=========================================Date time object ==================================
+what does the below code means: [ {**dict(row), "created_at": parse(row["created_at"]) if isinstance(row["created_at"], str) else datetime.combine(date.today(), row["created_at"])} for row in posts ]
+This Python list comprehension processes posts (a collection of database rows) and ensures created_at is correctly formatted as a datetime object.
+
+🚀 Breakdown:
+for row in posts → Iterates through each row in posts (which likely comes from a database query).
+
+dict(row) → Converts each row into a dictionary.
+
+{**dict(row), ...} → Expands the dictionary and modifies specific fields.
+
+row["created_at"] → Extracts the created_at value from the row.
+
+if isinstance(row["created_at"], str) else ... → Checks whether created_at is a string:
+
+If string (e.g., "21:54:31.237076+05:30"), it applies parse(row["created_at"]) to convert it into a datetime object.
+
+If datetime.time (which happens when PostgreSQL only returns the time portion), it combines it with today’s date using datetime.combine(date.today(), row["created_at"]).
+
+Purpose:
+Ensures that created_at is always returned as a proper datetime object, whether it came from PostgreSQL as a string or a time object.
