@@ -3,3 +3,4 @@ myenv/
 __pycache__/
 *.cache
 *.log
+.vscode/settings.json
