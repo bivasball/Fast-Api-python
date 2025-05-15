@@ -6,62 +6,27 @@ from sqlalchemy import text
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
-# /users/
-# /users
-
-
-# @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.UserOut)
-def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-
-    # hash the password - user.password
-    hashed_password = utils.hash(user.password)
-    user.password = hashed_password
-
-    new_user = models.User(**user.dict())
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-
-    return new_user
-
-
-#@router.get("/{id}", response_model=schemas.UserOut)
-def get_user(
-    id: int,
-    db: Session = Depends(get_db),
-):
-    user = db.query(models.User).filter(models.User.id == id).first()
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"User with id: {id} does not exist",
-        )
-
-    return user
-
 
 @router.get("/", response_model=schemas.UserOut)
 def get_user(id: int, db: Session = Depends(get_db)):
 
     # Use raw SQL query to fetch the user by ID
-    query = text("SELECT id, email, created_at FROM fast_api.usersEmailPass WHERE id = :id")
+    query = text(
+        "SELECT id, email, created_at FROM fast_api.usersEmailPass WHERE id = :id"
+    )
     result = db.execute(query, {"id": id}).fetchone()
 
     if not result:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"User with id {id} does not exist"
+            detail=f"User with id {id} does not exist",
         )
 
     # Return user details as a dictionary
-    return {
-        "id": result.id,
-        "email": result.email,
-        "created_at": result.created_at
-    }
+    return {"id": result.id, "email": result.email, "created_at": result.created_at}
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED,response_model=schemas.UserOut)
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.UserOut)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
     # Check if user already exists
