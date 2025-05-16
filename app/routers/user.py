@@ -1,6 +1,6 @@
-from fastapi import FastAPI, Response, status, HTTPException, Depends, APIRouter
+from fastapi import status, HTTPException, Depends, APIRouter
 from sqlalchemy.orm import Session
-from .. import models, schemas, utils, oauth2
+from .. import schemas, utils, oauth2
 from ..database import get_db
 from sqlalchemy import text
 
@@ -67,3 +67,108 @@ def create_user(
         )
 
     return {"id": result.id, "email": result.email, "created_at": result.created_at}
+
+
+# ---------------Delete user by id ----#
+@router.delete("/", status_code=status.HTTP_204_NO_CONTENT)
+def delete_user(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: int = Depends(oauth2.get_current_user),
+):
+    # Check if user exists
+    query = text("SELECT id FROM fast_api.usersEmailPass WHERE id = :id")
+    result = db.execute(query, {"id": id}).fetchone()
+
+    if not result:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User with id {id} does not exist",
+        )
+
+    # Delete user
+    delete_query = text("DELETE FROM fast_api.usersEmailPass WHERE id = :id")
+    db.execute(delete_query, {"id": id})
+    db.commit()  # Ensure changes are saved
+
+    # return statment not required as it is returning 204
+
+
+@router.put("/", status_code=status.HTTP_200_OK)
+def update_user(
+    id: int,
+    email: str,
+    db: Session = Depends(get_db),
+    current_user: int = Depends(oauth2.get_current_user),
+):
+    # Check if user exists
+    query = text("SELECT id FROM fast_api.usersEmailPass WHERE id = :id")
+    result = db.execute(query, {"id": id}).fetchone()
+
+    if not result:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User with id {id} does not exist",
+        )
+
+    # Check if the new email is already taken
+    email_check_query = text(
+        "SELECT id FROM fast_api.usersEmailPass WHERE email = :email"
+    )
+    email_exists = db.execute(email_check_query, {"email": email}).fetchone()
+
+    if email_exists:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Email '{email}' is already in use.",
+        )
+
+    # Update user email
+    update_query = text(
+        "UPDATE fast_api.usersEmailPass SET email = :email WHERE id = :id"
+    )
+    db.execute(update_query, {"id": id, "email": email})
+    db.commit()  # Save changes
+
+    return {"message": f"The email {email} has been updated for the id {id}"}
+
+
+# ---------------------PATCH -------for partial update -------------#
+@router.patch("/", status_code=status.HTTP_200_OK)
+def patch_user(
+    id: int,
+    email: str = None,  # Optional field for partial updates
+    db: Session = Depends(get_db),
+    current_user: int = Depends(oauth2.get_current_user),
+):
+    # Check if user exists
+    query = text("SELECT id, email FROM fast_api.usersEmailPass WHERE id = :id")
+    result = db.execute(query, {"id": id}).fetchone()
+
+    if not result:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User with id {id} does not exist",
+        )
+
+    # Check if the new email is already taken
+    if email:
+        email_check_query = text(
+            "SELECT id FROM fast_api.usersEmailPass WHERE email = :email"
+        )
+        email_exists = db.execute(email_check_query, {"email": email}).fetchone()
+
+        if email_exists:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Email '{email}' is already in use.",
+            )
+
+        # Update only the provided fields
+        update_query = text(
+            "UPDATE fast_api.usersEmailPass SET email = :email WHERE id = :id"
+        )
+        db.execute(update_query, {"id": id, "email": email})
+        db.commit()  # Save changes
+
+    return {"message": f"The email {email} has been updated for the id {id}"}
