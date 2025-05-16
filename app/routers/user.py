@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Response, status, HTTPException, Depends, APIRouter
 from sqlalchemy.orm import Session
-from .. import models, schemas, utils
+from .. import models, schemas, utils, oauth2
 from ..database import get_db
 from sqlalchemy import text
 
@@ -8,7 +8,7 @@ router = APIRouter(prefix="/users", tags=["Users"])
 
 
 @router.get("/", response_model=schemas.UserOut)
-def get_user(id: int, db: Session = Depends(get_db)):
+def get_user(id: int, db: Session = Depends(get_db),current_user: int = Depends(oauth2.get_current_user)):
 
     # Use raw SQL query to fetch the user by ID
     query = text(
