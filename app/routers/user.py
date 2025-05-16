@@ -1,4 +1,4 @@
-from fastapi import status, HTTPException, Depends, APIRouter
+from fastapi import status, Response, HTTPException, Depends, APIRouter
 from sqlalchemy.orm import Session
 from .. import schemas, utils, oauth2
 from ..database import get_db
@@ -7,7 +7,7 @@ from sqlalchemy import text
 router = APIRouter(prefix="/users", tags=["Users"])
 
 
-@router.get("/", response_model=schemas.UserOut)
+@router.get("/", response_model=schemas.UserOut, status_code=status.HTTP_200_OK)
 def get_user(
     id: int,
     db: Session = Depends(get_db),
@@ -160,7 +160,7 @@ def patch_user(
 
         if email_exists:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
+                status_code=status.HTTP_409_CONFLICT,
                 detail=f"Email '{email}' is already in use.",
             )
 
@@ -172,3 +172,35 @@ def patch_user(
         db.commit()  # Save changes
 
     return {"message": f"The email {email} has been updated for the id {id}"}
+
+
+# ---------------------HEAD---------#
+
+
+@router.head("/", status_code=status.HTTP_200_OK)
+def check_user_exists(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: int = Depends(oauth2.get_current_user),
+):
+    # Use raw SQL query to check if user exists
+    query = text(
+        "SELECT id, email, created_at FROM fast_api.usersEmailPass WHERE id = :id"
+    )
+    result = db.execute(query, {"id": id}).fetchone()
+
+    if not result:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User with id {id} does not exist",
+        )
+
+    # Set additional headers for metadata
+    headers = {
+        "X-User-ID": str(result.id),
+        "X-Email": result.email,
+        "X-Creation-Date": str(result.created_at),
+        "X-Resource-Exists": "True",
+    }
+
+    return Response(headers=headers)
