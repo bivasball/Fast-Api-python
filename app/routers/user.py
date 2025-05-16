@@ -8,7 +8,11 @@ router = APIRouter(prefix="/users", tags=["Users"])
 
 
 @router.get("/", response_model=schemas.UserOut)
-def get_user(id: int, db: Session = Depends(get_db),current_user: int = Depends(oauth2.get_current_user)):
+def get_user(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: int = Depends(oauth2.get_current_user),
+):
 
     # Use raw SQL query to fetch the user by ID
     query = text(
@@ -27,7 +31,11 @@ def get_user(id: int, db: Session = Depends(get_db),current_user: int = Depends(
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.UserOut)
-def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+def create_user(
+    user: schemas.UserCreate,
+    db: Session = Depends(get_db),
+    current_user: int = Depends(oauth2.get_current_user),
+):
 
     # Check if user already exists
     query_check = text("SELECT email FROM fast_api.usersEmailPass WHERE email = :email")
