@@ -1,3 +1,8 @@
+# ENV FOR THREE ARE ADDED, LIKE DEV, UAT, PROD
+# DEFAULT IS DEV,
+ENV=uat uvicorn main:app --reload  # Loads app/.env.uat
+
+
 
 $python -m venv myenv
 # to use the virtual environment created `myenv`
